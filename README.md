@@ -1,19 +1,13 @@
-# tiny-chess-01 v3
+# tiny-chess-01 v4
 
-`main.py` = LZMA-packed `engine.py` (made with `makefun compress`). Run:
-`MAKEFUN_ENV_URL=<env> python3 -P -s main.py`
+`main.py` = LZMA-packed `engine.py` (`makefun compress`). Run: `MAKEFUN_ENV_URL=<env> python3 -P -s main.py`
 
-Design (sunfish-style 120-square board, rewritten):
-- negamax alpha-beta + PVS, transposition table, killer + history ordering
-- late-move reductions, null move, quiescence on captures
-- incremental make/unmake (v3 speed fix: no board rebuild per move)
-- iterative deepening on a node budget (NB=80000 default; ~75k nodes/s after
-  the v3 speed fix, max move ~1.0 s at NB=100k, no games lost on time)
-- mate/stalemate detection, repetition = draw (from the env's move list)
-- king PST switches to an endgame table when material is low
+Design (sunfish-style 120-square board): negamax alpha-beta + PVS, TT, killer+history
+ordering, LMR, null move, capture quiescence, mate/stalemate detection, repetition as draw,
+endgame king PST. Iterative deepening to a node budget NB=100000 (hard abort at 2x),
+no clock: deterministic. Unloaded ~86k nodes/s, ~1.5 s/move, max ~2.7 s solo.
 
-Local practice (6 games per trial, kit scorer):
-- v2 NB=50000: 1451 / 1654 / 1545 (mean ~1550)
-- v3d NB=100k: 1654 / 2112 / 1451 (mean ~1739, best 2112 = perfect 6-0)
-- v3f NB=80k: 1654 / 1451 / 2112 (mean ~1739, best 2112 = perfect 6-0)
-- Mean still below rank 1 (2,110), but the engine has hit the 2,112 cap twice.
+Local practice (6 games/trial; 3 kit instances + 3 self-drawn with the kit generator),
+NB=100k, no time losses: 1654 / 1809 / 1545 / 1545 / 1809 / 2112.
+Mean 1746, best 2112, worst 1545. Below rank 1 (2,110).
+Note: run local trials at most 2 in parallel; 3 in parallel starves the bot and loses on time.
